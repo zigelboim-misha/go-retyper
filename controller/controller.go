@@ -5,6 +5,7 @@ import (
 	"github.com/micmonay/keybd_event"
 	"github.com/moutend/go-hook/pkg/types"
 	"keyboard/keylogger"
+	"keyboard/typer"
 )
 
 // Start starts the keylogger and when needed, it re-types the last input.
@@ -20,23 +21,12 @@ func keyChecker(pressedKeysChan chan types.KeyboardEvent) {
 	var keysPressed []types.KeyboardEvent
 
 	for key := range pressedKeysChan {
-		fmt.Printf("%s", key.VKCode)
 
-		// TODO
-		// There is a need to implement a better stopping/alerting case to start the Re-Type.
-		if key.ScanCode == keybd_event.VK_SPACE {
-			fmt.Println("Re-Typing reason was reached, there is a need to Re-Type!")
+		if key.ScanCode == keybd_event.VK_F2 {
+			fmt.Println("Re-Typing reason was reached (F2 button pressed), there is a need to Re-Type!")
 
-			// TODO
-			// There is a need to:
-			//   1. Delete the last incorrect input
-			//   2. Re-Type the correct string
-			//   3. DONE!
-			for _, key := range keysPressed {
-				fmt.Printf("%s ", key.VKCode)
-			}
-			
-			fmt.Println()
+			typer.ReType(keysPressed)
+
 			keysPressed = keysPressed[:0] // Keeping the allocated memory
 		} else {
 			keysPressed = append(keysPressed, key)
