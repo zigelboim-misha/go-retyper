@@ -13,7 +13,7 @@ func ReType(keyboard keybd_event.KeyBonding, keys []objects.Letter) {
 	reTypeKeys(keyboard, keys)
 }
 
-// changeLanguage changes the keyboard language using ALT + SHIFT keys.
+// changeLanguage changes the keyboard language using ALT + types.VK_SHIFT keys.
 func changeLanguage(keyboard keybd_event.KeyBonding) {
 	fmt.Println("Changing the Keyboard language using ALT + SHIFT")
 	keyboard.HasSHIFT(true)
