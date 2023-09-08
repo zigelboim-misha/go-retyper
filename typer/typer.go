@@ -3,46 +3,51 @@ package typer
 import (
 	"fmt"
 	"github.com/micmonay/keybd_event"
-	"github.com/moutend/go-hook/pkg/types"
-	"time"
+	"keyboard/objects"
 )
 
 // ReType simulates keyboard events for pressing keyboard keys.
-func ReType(keys []types.KeyboardEvent) {
-	kb, err := keybd_event.NewKeyBonding()
-	if err != nil {
-		panic(err)
-	}
-
-	time.Sleep(1 * time.Second)
-	deleteWrongKeys(kb, len(keys))
-	changeLanguage(kb)
-
-	// Press the selected keys
-	for _, key := range keys {
-		kb.SetKeys(int(key.ScanCode))
-
-		kb.Launching()
-	}
+func ReType(keyboard keybd_event.KeyBonding, keys []objects.Letter) {
+	deleteWrongKeys(keyboard, len(keys))
+	changeLanguage(keyboard)
+	reTypeKeys(keyboard, keys)
 }
 
-// changeLanguage changes the keyboard language using ALT + SHIFT.
-func changeLanguage(kb keybd_event.KeyBonding) {
+// changeLanguage changes the keyboard language using ALT + SHIFT keys.
+func changeLanguage(keyboard keybd_event.KeyBonding) {
 	fmt.Println("Changing the Keyboard language using ALT + SHIFT")
-	kb.HasSHIFT(true)
-	kb.HasALT(true)
-	kb.Launching()
+	keyboard.HasSHIFT(true)
+	keyboard.HasALT(true)
 
-	kb.HasSHIFT(false)
-	kb.HasALT(false)
+	err := keyboard.Launching()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	keyboard.HasSHIFT(false)
+	keyboard.HasALT(false)
 }
 
 // deleteWrongKeys deletes the wrong entered keys.
-func deleteWrongKeys(kb keybd_event.KeyBonding, count int) {
+func deleteWrongKeys(keyboard keybd_event.KeyBonding, count int) {
 	fmt.Printf("Removing the wrong text (%d chars)\n", count)
-	kb.SetKeys(keybd_event.VK_BACKSPACE)
+	keyboard.SetKeys(keybd_event.VK_BACKSPACE)
 
 	for i := 0; i < count; i++ {
-		kb.Launching()
+		keyboard.Launching()
+	}
+}
+
+// reTypeKeys should Re-Type all the needed keys.
+func reTypeKeys(keyboard keybd_event.KeyBonding, keys []objects.Letter) {
+	for _, key := range keys {
+		fmt.Println(key)
+		if key.Capitalized == true {
+			keyboard.HasSHIFT(true)
+		} else {
+			keyboard.HasSHIFT(false)
+		}
+		keyboard.SetKeys(int(key.KeyboardEvent.ScanCode))
+		keyboard.Launching()
 	}
 }
