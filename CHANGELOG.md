@@ -15,3 +15,6 @@ pass additional information about the pressed keys:
   - [Keylogger](/keylogger/keylogger.go) now uses the [Letter](/objects/letter.go) object and checks for capital letters
 
 ## Fixes 🌌
+
+- [#8](https://github.com/zigelboim-misha/go-retyper/pull/8) - `Re-Typing` more than once results in deleting **all**
+written text and replacing it again.
