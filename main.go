@@ -7,13 +7,14 @@ import (
 )
 
 func main() {
+	// Initializing the keyboard to send press events to - type the corrected keys
 	keyboard, err := keybd_event.NewKeyBonding()
 	if err != nil {
 		panic(err)
 	}
-	time.Sleep(1 * time.Second)
+	time.Sleep(2 * time.Second) // Linux needs a 2 sec sleep before using the keyboard
 
-	controller.Start(keyboard)
-	for {
-	}
+	go controller.Start(keyboard)
+
+	select {} // While true
 }
