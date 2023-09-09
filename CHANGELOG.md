@@ -18,10 +18,7 @@ pass additional information about the pressed keys:
   - `TAB` was pressed - User moved to the next input field on a website
   - `Up`, `Down`, `Left` and `Right` keys were pressed - User looked at the screen and moved his cross-hair
   - `Delete` or `Back Space` keys were pressed - User deleted text, he wants to fix the error himself
-  - `CAPS-LOCK` was pressed - Logic like `SHIFT` needs to be implemented
   - Timeout - The user left the keyboard for a long time (make it configurable)
-  - Slice limit reached - The user can configure how many letter will be stored in the `keysPressed` slice to keep the 
-memory from overloading
 
 ## Fixes 🌌
 
