@@ -20,13 +20,20 @@ func Start(keyboard keybd_event.KeyBonding) {
 	go keylogger.KeyLogger(pressedKeysChan, stopKeyloggerChan) // Start key-logging the keyboard
 
 	for key := range pressedKeysChan {
-		if key.KeyboardEvent.ScanCode == keybd_event.VK_F2 {
+		switch key.KeyboardEvent.ScanCode {
+		case keybd_event.VK_F2:
 			fmt.Println("controller: Re-Typing reason was reached (F2 button pressed), there is a need to Re-Type!")
 			stopKeyloggerChan <- true
 			typer.ReType(keyboard, keysPressed)                        // Start the Re-Typing process
 			go keylogger.KeyLogger(pressedKeysChan, stopKeyloggerChan) // Start key-logging the keyboard
 			keysPressed = keysPressed[:0]                              // Keeping the allocated memory
-		} else {
+
+		case keybd_event.VK_UP, keybd_event.VK_LEFT, keybd_event.VK_DOWN, keybd_event.VK_RIGHT,
+			keybd_event.VK_DELETE, keybd_event.VK_BACKSPACE, keybd_event.VK_TAB:
+			fmt.Println("controller: Special key was pressed, flushing the keysPressed slice.")
+			keysPressed = keysPressed[:0]
+
+		default:
 			keysPressed = append(keysPressed, key)
 		}
 	}
