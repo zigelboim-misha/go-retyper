@@ -17,7 +17,7 @@ about the pressed keys:
   - [Keylogger](/keylogger/keylogger.go) now uses the
 [Letter](/objects/letter.go) object and checks for capital letters
 
-- [#9](https://github.com/zigelboim-misha/go-retyper/pull/9) - Clearing the 
+- [#9](https://github.com/zigelboim-misha/go-retyper/pull/9) - Clearing the
 `keysPressed` slice when:
   - `TAB` was pressed - User moved to the next input field on a website
   - `Up`, `Down`, `Left` and `Right` keys were pressed - User looked at the
