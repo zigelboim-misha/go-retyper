@@ -8,28 +8,26 @@ import (
 	"keyboard/typer"
 )
 
-// Start starts the keylogger and when needed, it re-types the last input.
+var (
+	keysPressed       []objects.Letter
+	pressedKeysChan   = make(chan objects.Letter) // Channel for all pressed keys
+	stopKeyloggerChan = make(chan bool)           // Telling the keylogger.KeyLogger() method to stop key-logging
+)
+
+// Start key-logs the users keyboard. When the help flag is raised it removes the wrong typed keys replacing them
+// with the correct ones.
 func Start(keyboard keybd_event.KeyBonding) {
-	pressedKeysChan := make(chan objects.Letter) // Channel for all pressed keys
-
-	go keylogger.KeyLogger(pressedKeysChan)
-	go keyChecker(keyboard, pressedKeysChan)
-}
-
-// keyChecker checks each key for a Re-Typing reason.
-func keyChecker(keyboard keybd_event.KeyBonding, pressedKeysChan chan objects.Letter) {
-	var keysPressed []objects.Letter
+	go keylogger.KeyLogger(pressedKeysChan, stopKeyloggerChan) // Start key-logging the keyboard
 
 	for key := range pressedKeysChan {
 		if key.KeyboardEvent.ScanCode == keybd_event.VK_F2 {
-			fmt.Println("Re-Typing reason was reached (F2 button pressed), there is a need to Re-Type!")
-
-			typer.ReType(keyboard, keysPressed)
-			keysPressed = keysPressed[:0] // Keeping the allocated memory
+			fmt.Println("controller: Re-Typing reason was reached (F2 button pressed), there is a need to Re-Type!")
+			stopKeyloggerChan <- true
+			typer.ReType(keyboard, keysPressed)                        // Start the Re-Typing process
+			go keylogger.KeyLogger(pressedKeysChan, stopKeyloggerChan) // Start key-logging the keyboard
+			keysPressed = keysPressed[:0]                              // Keeping the allocated memory
 		} else {
-			if key.IsShift == false {
-				keysPressed = append(keysPressed, key)
-			}
+			keysPressed = append(keysPressed, key)
 		}
 	}
 }

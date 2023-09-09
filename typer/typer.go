@@ -11,37 +11,32 @@ func ReType(keyboard keybd_event.KeyBonding, keys []objects.Letter) {
 	deleteWrongKeys(keyboard, len(keys))
 	changeLanguage(keyboard)
 	reTypeKeys(keyboard, keys)
+	fmt.Println("typer: Re-Typing finished")
 }
 
 // changeLanguage changes the keyboard language using ALT + types.VK_SHIFT keys.
 func changeLanguage(keyboard keybd_event.KeyBonding) {
-	fmt.Println("Changing the Keyboard language using ALT + SHIFT")
+	fmt.Println("typer: Changing the Keyboard language using ALT + SHIFT...")
 	keyboard.HasSHIFT(true)
 	keyboard.HasALT(true)
-
-	err := keyboard.Launching()
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	keyboard.HasSHIFT(false)
-	keyboard.HasALT(false)
+	keyboard.Launching()
+	keyboard.Clear()
 }
 
 // deleteWrongKeys deletes the wrong entered keys.
 func deleteWrongKeys(keyboard keybd_event.KeyBonding, count int) {
-	fmt.Printf("Removing the wrong text (%d chars)\n", count)
+	fmt.Println("typer: Removing the wrong text - ", count, " keys...")
 	keyboard.SetKeys(keybd_event.VK_BACKSPACE)
-
 	for i := 0; i < count; i++ {
 		keyboard.Launching()
 	}
+	keyboard.Clear()
 }
 
 // reTypeKeys should Re-Type all the needed keys.
 func reTypeKeys(keyboard keybd_event.KeyBonding, keys []objects.Letter) {
+	fmt.Println("typer: Re-Typing the correct keys now...")
 	for _, key := range keys {
-		fmt.Println(key)
 		if key.Capitalized == true {
 			keyboard.HasSHIFT(true)
 		} else {
@@ -50,4 +45,5 @@ func reTypeKeys(keyboard keybd_event.KeyBonding, keys []objects.Letter) {
 		keyboard.SetKeys(int(key.KeyboardEvent.ScanCode))
 		keyboard.Launching()
 	}
+	keyboard.Clear()
 }
